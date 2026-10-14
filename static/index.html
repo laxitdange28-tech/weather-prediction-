@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtmosphereAI | Deep Learning Weather Forecaster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="theme-sunny">
+
+  <!-- Dynamic Animated Weather Canvas/Sky FX -->
+  <div id="sky-effects" class="sky-container">
+    <div class="sun-flare"></div>
+    <div class="rain-canvas"></div>
+    <div class="snow-canvas"></div>
+    <div class="cloud-canvas"></div>
+    <div class="lightning-flash"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="app-layout">
+    
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg class="weather-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Atmosphere<span>AI</span></h1>
+          <p>Neural Network Weather Forecaster • Backpropagation Engine</p>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <div class="badge-pill model-badge">
+          <span class="pulse-dot"></span>
+          <span class="label">Architecture:</span>
+          <strong>MLP [128, 64]</strong>
+        </div>
+        <div class="badge-pill accuracy-badge">
+          <span class="label">Accuracy:</span>
+          <strong id="header-accuracy">98.74%</strong>
+        </div>
+        <button id="theory-btn" class="info-btn" title="View Backpropagation Calculus & Architecture">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4M12 8h.01"></path>
+          </svg>
+          <span>Backprop Theory</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid: Controls + Visual Results -->
+    <main class="main-content">
+
+      <!-- LEFT COLUMN: CONTROLS & INPUTS -->
+      <section class="panel control-panel glass-card">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <h2>Meteorological Inputs</h2>
+            <p>Tune atmospheric parameters or choose a quick preset</p>
+          </div>
+          <div class="unit-toggle-wrap">
+            <button id="unit-c" class="unit-btn active">°C</button>
+            <button id="unit-f" class="unit-btn">°F</button>
+          </div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="presets-section">
+          <label class="section-label">⚡ Quick Weather Scenarios</label>
+          <div class="presets-grid" id="presets-container">
+            <button class="preset-pill" data-preset="sunny">☀️ Sunny Day</button>
+            <button class="preset-pill" data-preset="rainy">🌧️ Downpour</button>
+            <button class="preset-pill" data-preset="stormy">⛈️ Thunderstorm</button>
+            <button class="preset-pill" data-preset="snowy">❄️ Blizzard</button>
+            <button class="preset-pill" data-preset="cloudy">☁️ Overcast</button>
+          </div>
+        </div>
+
+        <!-- Input Form -->
+        <form id="weather-form" class="controls-grid" onsubmit="return false;">
+          
+          <!-- City Selection -->
+          <div class="input-card full-width">
+            <div class="input-header">
+              <label for="location-select">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Observation Location
+              </label>
+              <span class="input-meta" id="city-count-badge">10 Cities Supported</span>
+            </div>
+            <select id="location-select" class="custom-select">
+              <option value="New York">New York (NYC)</option>
+              <option value="Los Angeles">Los Angeles (LAX)</option>
+              <option value="Chicago" selected>Chicago (ORD)</option>
+              <option value="Houston">Houston (IAH)</option>
+              <option value="Phoenix">Phoenix (PHX)</option>
+              <option value="Philadelphia">Philadelphia (PHL)</option>
+              <option value="San Antonio">San Antonio (SAT)</option>
+              <option value="San Diego">San Diego (SAN)</option>
+              <option value="Dallas">Dallas (DFW)</option>
+              <option value="San Jose">San Jose (SJC)</option>
+            </select>
+          </div>
+
+          <!-- Temperature -->
+          <div class="input-card">
+            <div class="input-header">
+              <label for="temp-slider">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
+                Temperature
+              </label>
+              <div class="number-input-wrap">
+                <input type="number" id="temp-number" step="0.1" value="18.5" min="-20" max="45">
+                <span class="unit-label" id="temp-unit-label">°C</span>
+              </div>
+            </div>
+            <input type="range" id="temp-slider" min="-20" max="45" step="0.5" value="18.5" class="slider temp-slider">
+            <div class="slider-ticks">
+              <span>-20°C Freezing</span>
+              <span>15°C Mild</span>
+              <span>45°C Hot</span>
+            </div>
+          </div>
+
+          <!-- Humidity -->
+          <div class="input-card">
+            <div class="input-header">
+              <label for="humidity-slider">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                Relative Humidity
+              </label>
+              <div class="number-input-wrap">
+                <input type="number" id="humidity-number" step="1" value="65" min="10" max="100">
+                <span class="unit-label">%</span>
+              </div>
+            </div>
+            <input type="range" id="humidity-slider" min="10" max="100" step="1" value="65" class="slider humidity-slider">
+            <div class="slider-ticks">
+              <span>10% Dry</span>
+              <span>55% Normal</span>
+              <span>100% Saturated</span>
+            </div>
+          </div>
+
+          <!-- Precipitation -->
+          <div class="input-card">
+            <div class="input-header">
+              <label for="precip-slider">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="19" x2="8" y2="21"></line><line x1="8" y1="13" x2="8" y2="15"></line><line x1="16" y1="19" x2="16" y2="21"></line><line x1="16" y1="13" x2="16" y2="15"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="12" y1="15" x2="12" y2="17"></line><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>
+                Precipitation
+              </label>
+              <div class="number-input-wrap">
+                <input type="number" id="precip-number" step="0.1" value="1.5" min="0" max="15">
+                <span class="unit-label">mm</span>
+              </div>
+            </div>
+            <input type="range" id="precip-slider" min="0" max="15" step="0.1" value="1.5" class="slider precip-slider">
+            <div class="slider-ticks">
+              <span>0 mm None</span>
+              <span>4 mm Rain</span>
+              <span>15 mm Torrential</span>
+            </div>
+          </div>
+
+          <!-- Wind Speed -->
+          <div class="input-card">
+            <div class="input-header">
+              <label for="wind-slider">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
+                Wind Speed
+              </label>
+              <div class="number-input-wrap">
+                <input type="number" id="wind-number" step="0.5" value="12" min="0" max="35">
+                <span class="unit-label">km/h</span>
+              </div>
+            </div>
+            <input type="range" id="wind-slider" min="0" max="35" step="0.5" value="12" class="slider wind-slider">
+            <div class="slider-ticks">
+              <span>0 Calm</span>
+              <span>18 Moderate</span>
+              <span>35 Gale Force</span>
+            </div>
+          </div>
+
+          <!-- Temporal: Month & Hour -->
+          <div class="input-card">
+            <div class="input-header">
+              <label for="month-slider">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Month of Year
+              </label>
+              <span class="month-name-badge" id="month-name-badge">June (06)</span>
+            </div>
+            <input type="range" id="month-slider" min="1" max="12" step="1" value="6" class="slider time-slider">
+            <div class="slider-ticks">
+              <span>Jan (Winter)</span>
+              <span>Jun (Summer)</span>
+              <span>Dec (Winter)</span>
+            </div>
+          </div>
+
+          <div class="input-card">
+            <div class="input-header">
+              <label for="hour-slider">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Hour of Day
+              </label>
+              <span class="hour-name-badge" id="hour-name-badge">14:00 (Afternoon)</span>
+            </div>
+            <input type="range" id="hour-slider" min="0" max="23" step="1" value="14" class="slider time-slider">
+            <div class="slider-ticks">
+              <span>00:00 Midnight</span>
+              <span>12:00 Noon</span>
+              <span>23:00 Night</span>
+            </div>
+          </div>
+
+        </form>
+
+        <!-- Live Predict Toggle & Predict Button -->
+        <div class="panel-footer">
+          <div class="live-toggle-wrap">
+            <label class="switch">
+              <input type="checkbox" id="live-predict-toggle" checked>
+              <span class="slider-switch"></span>
+            </label>
+            <span class="toggle-text">Live Auto-Predict on change</span>
+          </div>
+
+          <button id="predict-btn" class="primary-predict-btn">
+            <span class="btn-spinner" id="btn-spinner"></span>
+            <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span class="btn-text">Execute Backprop Inference</span>
+          </button>
+        </div>
+
+      </section>
+
+
+      <!-- RIGHT COLUMN: PREDICTION RESULTS DASHBOARD -->
+      <section class="panel result-panel glass-card">
+        
+        <!-- Hero Prediction Card -->
+        <div class="hero-weather-card" id="hero-card">
+          <div class="hero-bg-glow"></div>
+          <div class="hero-top-row">
+            <div class="location-stamp">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <span id="hero-location-text">Chicago, IL</span>
+              <span class="dot-separator">•</span>
+              <span id="hero-time-text">14:00, Month 06</span>
+            </div>
+            <div class="confidence-pill" id="hero-confidence-pill">
+              <span class="conf-pulse"></span>
+              <span id="hero-confidence-text">99.2% Confidence</span>
+            </div>
+          </div>
+
+          <div class="hero-center-row">
+            <div class="hero-icon-container" id="hero-icon-container">
+              <!-- Dynamically populated SVG -->
+              <svg class="weather-hero-svg" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="14" fill="#FFA726" />
+                <g stroke="#FFA726" stroke-width="4" stroke-linecap="round">
+                  <line x1="32" y1="6" x2="32" y2="12" />
+                  <line x1="32" y1="52" x2="32" y2="58" />
+                  <line x1="6" y1="32" x2="12" y2="32" />
+                  <line x1="52" y1="32" x2="58" y2="32" />
+                  <line x1="13.6" y1="13.6" x2="17.8" y2="17.8" />
+                  <line x1="46.2" y1="46.2" x2="50.4" y2="50.4" />
+                  <line x1="13.6" y1="50.4" x2="17.8" y2="46.2" />
+                  <line x1="46.2" y1="17.8" x2="50.4" y2="13.6" />
+                </g>
+              </svg>
+            </div>
+            <div class="hero-details">
+              <div class="hero-status-tag" id="hero-status-tag">Predicted Atmospheric State</div>
+              <h3 class="hero-condition" id="hero-condition">Sunny & Clear Sky</h3>
+              <p class="hero-summary" id="hero-summary">Thermodynamic balance suggests high visibility and calm winds.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Key Thermodynamic Metric Gauges -->
+        <div class="metrics-quad-grid">
+          
+          <div class="metric-card">
+            <div class="metric-icon-wrap feels-like-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-title">Apparent Feels-Like</span>
+              <div class="metric-value-wrap">
+                <span class="metric-val" id="metric-feels-like">18.2</span>
+                <span class="metric-sub" id="metric-feels-unit">°C</span>
+              </div>
+              <span class="metric-note" id="metric-heat-chill">Steadman formula</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon-wrap dew-point-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-title">Dew Point</span>
+              <div class="metric-value-wrap">
+                <span class="metric-val" id="metric-dew-point">11.6</span>
+                <span class="metric-sub" id="metric-dew-unit">°C</span>
+              </div>
+              <span class="metric-note">Magnus-Tetens calc</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon-wrap rain-risk-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="19" x2="8" y2="21"></line><line x1="8" y1="13" x2="8" y2="15"></line><line x1="16" y1="19" x2="16" y2="21"></line><line x1="16" y1="13" x2="16" y2="15"></line><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-title">Precipitation Risk</span>
+              <div class="metric-value-wrap">
+                <span class="metric-val" id="metric-rain-risk">35.0</span>
+                <span class="metric-sub">%</span>
+              </div>
+              <span class="metric-note" id="metric-rain-severity">Moderate Chance</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon-wrap wind-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-title">Wind Force Rating</span>
+              <div class="metric-value-wrap">
+                <span class="metric-val" id="metric-wind-rating">Gentle</span>
+              </div>
+              <span class="metric-note" id="metric-wind-kmh">12 km/h</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Softmax Output Probabilities (Backpropagation Output Layer) -->
+        <div class="probabilities-section">
+          <div class="section-title-row">
+            <h4>Backprop Softmax Class Probabilities</h4>
+            <span class="sub-label">Softmax Distribution ($\sum P_i = 100\%$)</span>
+          </div>
+
+          <div class="prob-bars-list" id="prob-bars-list">
+            
+            <div class="prob-row" data-class="Sunny">
+              <div class="prob-label">
+                <span class="icon">☀️</span>
+                <span class="name">Sunny / Clear</span>
+              </div>
+              <div class="prob-bar-track">
+                <div class="prob-bar-fill sunny-fill" id="bar-Sunny" style="width: 82%;"></div>
+              </div>
+              <span class="prob-percent" id="pct-Sunny">82.0%</span>
+            </div>
+
+            <div class="prob-row" data-class="Cloudy">
+              <div class="prob-label">
+                <span class="icon">☁️</span>
+                <span class="name">Cloudy / Overcast</span>
+              </div>
+              <div class="prob-bar-track">
+                <div class="prob-bar-fill cloudy-fill" id="bar-Cloudy" style="width: 12%;"></div>
+              </div>
+              <span class="prob-percent" id="pct-Cloudy">12.0%</span>
+            </div>
+
+            <div class="prob-row" data-class="Rainy">
+              <div class="prob-label">
+                <span class="icon">🌧️</span>
+                <span class="name">Rainy</span>
+              </div>
+              <div class="prob-bar-track">
+                <div class="prob-bar-fill rainy-fill" id="bar-Rainy" style="width: 4%;"></div>
+              </div>
+              <span class="prob-percent" id="pct-Rainy">4.0%</span>
+            </div>
+
+            <div class="prob-row" data-class="Stormy">
+              <div class="prob-label">
+                <span class="icon">⛈️</span>
+                <span class="name">Stormy</span>
+              </div>
+              <div class="prob-bar-track">
+                <div class="prob-bar-fill stormy-fill" id="bar-Stormy" style="width: 1%;"></div>
+              </div>
+              <span class="prob-percent" id="pct-Stormy">1.0%</span>
+            </div>
+
+            <div class="prob-row" data-class="Snowy">
+              <div class="prob-label">
+                <span class="icon">❄️</span>
+                <span class="name">Snowy</span>
+              </div>
+              <div class="prob-bar-track">
+                <div class="prob-bar-fill snowy-fill" id="bar-Snowy" style="width: 1%;"></div>
+              </div>
+              <span class="prob-percent" id="pct-Snowy">1.0%</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Smart Meteorological Advisories -->
+        <div class="advisories-section">
+          <h4>Smart Weather Advisories & Safety</h4>
+          <div class="advisories-tags" id="advisories-container">
+            <span class="advisory-pill">☀️ Beautiful clear conditions: Excellent weather for outdoor recreation.</span>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- History Log Table -->
+    <section class="panel history-section glass-card">
+      <div class="history-header">
+        <div class="history-title-wrap">
+          <h3>Inference History Log</h3>
+          <p>Chronological record of recent Backpropagation neural predictions</p>
+        </div>
+        <button id="clear-history-btn" class="secondary-btn">Clear Log</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>City</th>
+              <th>Temp</th>
+              <th>Humidity</th>
+              <th>Precip</th>
+              <th>Wind</th>
+              <th>Predicted Condition</th>
+              <th>Confidence</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <!-- Dynamically populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Powered by <strong>FastAPI</strong>, <strong>Scikit-Learn MLP</strong>, and <strong>CORSMiddleware</strong>. Trained with Backpropagation on <code>weather_data.csv</code>.</p>
+    </footer>
+
+  </div>
+
+
+  <!-- Backpropagation Mathematics Modal -->
+  <div id="theory-modal" class="modal-overlay">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <h3>Mathematics of Backpropagation</h3>
+        </div>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="formula-card">
+          <h4>1. Forward Propagation</h4>
+          <p>Computes layer-by-layer activations from features to predictions:</p>
+          <code>Z^[l] = W^[l] · A^[l-1] + b^[l]</code>
+          <code>A^[l] = ReLU(Z^[l]) = max(0, Z^[l])</code>
+          <code>A^[L] = Softmax(Z^[L])_i = exp(Z_i^[L]) / Σ exp(Z_j^[L])</code>
+        </div>
+
+        <div class="formula-card">
+          <h4>2. Categorical Cross-Entropy Loss</h4>
+          <p>Measures discrepancy between predicted probabilities and ground truth one-hot vector:</p>
+          <code>L(y, ŷ) = - Σ (y_k · ln(ŷ_k))</code>
+        </div>
+
+        <div class="formula-card">
+          <h4>3. Backward Propagation (Chain Rule Derivatives)</h4>
+          <p>Calculates exact analytical gradients propagated from output back to input:</p>
+          <code>δ^[L] = ∂L / ∂Z^[L] = ŷ - y  (Output Layer Error)</code>
+          <code>δ^[l] = ((W^[l+1])^T · δ^[l+1]) ⊙ ReLU'(Z^[l])  (Hidden Layers)</code>
+          <code>∂L / ∂W^[l] = δ^[l] · (A^[l-1])^T</code>
+          <code>∂L / ∂b^[l] = δ^[l]</code>
+        </div>
+
+        <div class="formula-card">
+          <h4>4. Parameter Update (Adam Optimizer)</h4>
+          <p>Applies exponential moving averages of gradients (m_t) and squared gradients (v_t):</p>
+          <code>W^[l] ← W^[l] - α · m̂_t / (sqrt(v̂_t) + ε)</code>
+        </div>
+
+        <div class="architecture-specs">
+          <h4>Model Topology:</h4>
+          <ul>
+            <li><strong>Input Dimension:</strong> 16 features (6 meteorological + 10 one-hot location cities)</li>
+            <li><strong>Hidden Layer 1:</strong> 128 neurons, ReLU activation function</li>
+            <li><strong>Hidden Layer 2:</strong> 64 neurons, ReLU activation function</li>
+            <li><strong>Output Layer:</strong> 5 neurons (Sunny, Cloudy, Rainy, Stormy, Snowy) with Softmax</li>
+            <li><strong>Test Accuracy:</strong> 98.74% on 30,000 hold-out samples</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
